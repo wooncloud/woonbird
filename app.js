@@ -1,27 +1,22 @@
-import * as express from "express";
-import * as cookieParser from "cookie-parser";
-import * as morgan from "morgan";
-import * as path from "path";
-import * as session from "express-session";
-import * as nunjucks from 'nunjucks';
-import * as dotenv from "dotenv";
-
+import express from "express";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import path from "path";
+import session from "express-session";
+import dotenv from "dotenv";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+
+import pageRouter from './routers/page.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config();
-const pageRouter = require('./routes/page');
 
 const app = express();
 app.use('port', process.env.PORT || 8000);
-app.set('view engine', 'html');
-nunjucks.configure('views', {
-    express: app,
-    watch: true,
-})
+
 
 // ----- modules -----
 // morgan : 로그 남기는 라이브러리
