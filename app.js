@@ -15,21 +15,20 @@ const __dirname = dirname(__filename);
 dotenv.config();
 
 const app = express();
-app.use('port', process.env.PORT || 8000);
-
+app.set('port', process.env.PORT || 5000);
 
 // ----- modules -----
 // morgan : 로그 남기는 라이브러리
 app.use(morgan('dev'));
-// 
+
 app.use(express.static(path.join(__dirname, 'public')));
-// 
+
 app.use(express.json());
-// 
+
 app.use(express.urlencoded({extended: false}));
-// 
+
 app.use(cookieParser(process.env.COOKIE_SECRET));
-// 
+
 app.use(session({
     resave: false,
     saveUninitialized: false,
@@ -64,5 +63,5 @@ app.use((err, req, res, next) => {
 
 // listen
 app.listen(app.get('port'), () => {
-    console.log(app.get('port'), '번 포트에서 사용중.');
+    console.log(app.get('port'), `번 포트에서 사용중. (http://localhost:${app.get('port')})`);
 })
