@@ -10,10 +10,6 @@ router.get('/', (req, res) => {
 
 router.use('/user', userRouter);
 
-router.use('/users', userRouter);
-
 router.use('/post', postRouter);
-
-router.use('/posts', postRouter);
 
 export default router;
