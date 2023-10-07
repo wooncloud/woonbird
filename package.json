@@ -1,7 +1,7 @@
 {
   "name": "woonbird",
   "version": "0.0.1",
-  "description": "",
+  "description": "node.js 교과서 스터디 후 실습 리포지토리.",
   "main": "app.js",
   "type": "module",
   "scripts": {
@@ -11,6 +11,7 @@
   "author": "wooncloud",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.4.1",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
@@ -24,7 +25,14 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/node": "^20.8.3",
     "nodemon": "^3.0.1",
-    "prisma": "^5.3.1"
-  }
+    "prisma": "^5.4.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": []
 }
