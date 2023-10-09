@@ -3,35 +3,24 @@ import { post } from "../../controllers/index.js";
 
 const router = express.Router();
 
+// --- post ---
 // 포스트 리스트 조회
 router.get('/', post.getPostList);
 
 // 포스트 단일조회
-router.get('/:id', (req, res) => {
-    res.send('param is ' + req.params.id);
-    console.log(req.params, req.query);
-});
+router.get('/:id', post.getPostOne);
 
 // 포스트 생성
-router.post('/', (req, res) => {
-    res.send('wow');
-});
+router.post('/', post.createPost);
 
 // 포스트 수정
-router.put('/:id', (req, res) => {
-    res.send('param is ' + req.params.id);
-    console.log(req.params, req.query);
-});
+router.put('/:id', post.updatePost);
 
 // 포스트 삭제
-router.delete('/:id', (req, res) => {
-    res.send('param is ' + req.params.id);
-    console.log(req.params, req.query);
-});
+router.delete('/:id', post.deletePost);
 
 
 // --- like ---
-
 // like 추가
 router.post('/:id/like', (req, res) => {
     res.send('create post like');

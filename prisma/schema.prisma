@@ -15,19 +15,18 @@ model countries {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model likes {
-  like_id      BigInt    @id @default(autoincrement())
+  like_id      Int       @id @default(autoincrement())
   user_id      String?   @db.VarChar(100)
-  post_id      BigInt?
+  post_id      Int?
   created_date DateTime? @default(now()) @db.Timestamptz(6)
-  posts        posts?    @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction)
   users        users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model post_files {
-  file_id      BigInt    @id @default(autoincrement())
-  post_id      BigInt?
+  file_id      Int       @id @default(autoincrement())
+  post_id      Int?
   file_url     String?
   file_name    String?
   delete_date  DateTime? @db.Timestamptz(6)
@@ -38,11 +37,10 @@ model post_files {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model posts {
-  post_id      BigInt       @id
+  post_id      Int          @id @default(autoincrement())
   user_id      String?      @db.VarChar(100)
   content      String?
   created_date DateTime     @default(now()) @db.Timestamptz(6)
-  likes        likes[]
   post_files   post_files[]
 }
 
