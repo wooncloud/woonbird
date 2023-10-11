@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { log } from "console";
 
 const prisma = new PrismaClient({ log: ["query"] });
 
@@ -82,10 +81,31 @@ async function deletePost(post_id) {
   return post;
 }
 
+async function searchPosts(content) {
+  let posts = null;
+  try {
+    posts = await prisma.posts.findMany({
+      where: {
+        content: {
+          contains: content,
+          mode: "insensitive"
+        }
+      }
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await prisma.$disconnect();
+  }
+
+  return posts;
+}
+
 export default {
   findPostMany,
   findPostOneById,
   createPost,
   updatePost,
   deletePost,
+  searchPosts,
 };

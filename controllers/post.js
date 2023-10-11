@@ -76,10 +76,22 @@ const deletePost = (req, res) => {
   res.send(result);
 };
 
+const searchPosts = async (req, res) => {
+  let result = null;
+  try {
+    result = await post.searchPosts();
+  } catch (e) {
+    console.error(e);
+  }
+
+  res.send(result);
+};
+
 export default {
   getPostList,
   getPostOne,
   createPost,
   updatePost,
   deletePost,
+  searchPosts,
 };

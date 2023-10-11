@@ -19,6 +19,9 @@ router.put('/', post.updatePost);
 // 포스트 삭제
 router.delete('/', post.deletePost);
 
+// 포스트 검색
+router.get('/search/:search', post.searchPosts);
+
 
 // --- like ---
 // like 추가
@@ -27,7 +30,7 @@ router.post('/:id/like', (req, res) => {
 });
 
 // like 삭제 (이거 되나)
-router.delete('/like/:id', (req, res) => {
+router.delete('/like', (req, res) => {
     res.send('delete post like');
 });
 

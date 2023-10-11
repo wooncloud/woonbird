@@ -31,4 +31,13 @@ router.delete('/:id', (req, res) => {
 	console.log(req.params, req.query);
 });
 
+
+// 사용자가 활동한 콘텐츠들
+// 사용자가 작성한 포스트 조회
+router.get('/posts', post.getPostOne);
+
+// 사용자가 누른 좋아요 포스트 조회
+router.get('/likes', post.getPostOne);
+
+
 export default router;
