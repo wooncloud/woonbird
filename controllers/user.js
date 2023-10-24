@@ -1,47 +1,81 @@
+import express from 'express';
+import { hashPassword } from '../util/passwordUtils.js';
+const app = express();
+
 const signup = async (req, res) => {
-    let result = null;
-    // try {
-    //     result = await ...
-    // } catch (e) {
-    //     console.error(e);
-    // }
+    try {
+        // TODO 누락건 : 사용자 이름, 이메일
+        const { userId, password } = req.body;
 
-    console.log(req, res);
-    // 유효한 아이디인가?
-    // 유효한 비밀번호인가? (길이, 형식)
-    // 이미 존재하는 아이디인가?
-    // 비밀번호 암호화
-    // 디비 저장
-    // 회원 가입 완료. 로그인 해주세요.
+        // 유효성 검사를 수행
+        if (!isValidUsername(userId) || !isValidPassword(password)) {
+            return res.status(400).send("Invalid username or password format.");
+        }
 
-    res.send(result);
+        // 이미 존재하는 아이디인지 확인
+        const userExists = await checkIfUserExists(userId);
+        if (userExists) {
+            return res.status(400).send("이미 존재하는 아이디 입니다. 다른 아이디를 입력해주세요.");
+        }
+
+        // 비밀번호 암호화
+        const hashedPassword = await hashPassword(password);
+
+        // 디비에 저장
+        await signupUser(userId, hashedPassword);
+
+        // 회원 가입 완료 메시지
+        return res.status(200).send("회원가입 성공! 로그인을 해주세요.");
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send("회원가입을 하는 동안 문제가 발생했습니다.");
+    }
 };
 
 const login = async (req, res) => {
-    let result = null;
-    console.log(req, res);
+    try {
+        const { userId, password } = req.body;
 
-    // 입력한 아이디의 정보를 가져온다.
-    // 아이디가 없으면 없는 아이디 리턴
-    // 아이디가 있으면 입력받은 비밀번호 암호화
-    // 두 비밀번호를 비교하여 계정이 맞는지 확인
-    // 틀리면 비밀번호 틀렸다고 리턴
-    // 세션 생성
-    // 메인 페이지로 리다이렉트
+        // 입력한 아이디로 사용자 정보를 가져옴.
+        const user = await findUserById(userId);
+        if (!user) {
+            return res.status(401).send("계정 정보가 일치하지 않습니다.");
+        }
 
-    res.send(result);
+        // 입력된 비밀번호를 해시된 비밀번호와 비교.
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).send("비밀번호 틀림");
+        }
+
+        // 세션 생성 (세션 관리 미들웨어가 설정되어야 함)
+        req.session.user = user;
+
+        res.redirect('/main');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("로그인 중 오류 발생");
+    }
 };
 
 const logout = (req, res) => {
-    let result = null;
-    console.log(req, res);
-
-    // 입력한 아이디의 세션을 삭제.
-    
-
-    res.send(result);
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send("로그아웃 중 오류 발생");
+            } else {
+                res.redirect('/login');
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("로그아웃 중 오류 발생");
+    }
 };
 
 export default {
     signup,
+    login,
+    logout
 };
