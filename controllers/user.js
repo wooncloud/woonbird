@@ -1,19 +1,21 @@
 import express from 'express';
+import userService from '../services/user.js';
 import { hashPassword } from '../util/passwordUtils.js';
+import { isValidUserId, isValidPassword } from '../util/validationCheck.js';
 const app = express();
 
 const signup = async (req, res) => {
     try {
         // TODO 누락건 : 사용자 이름, 이메일
-        const { userId, password } = req.body;
+        const { user_id, password, name, email } = req.body;
 
         // 유효성 검사를 수행
-        if (!isValidUsername(userId) || !isValidPassword(password)) {
+        if (!isValidUserId(user_id) || !isValidPassword(password)) {
             return res.status(400).send("Invalid username or password format.");
         }
 
         // 이미 존재하는 아이디인지 확인
-        const userExists = await checkIfUserExists(userId);
+        const userExists = await userService.checkIfUserExists(user_id);
         if (userExists) {
             return res.status(400).send("이미 존재하는 아이디 입니다. 다른 아이디를 입력해주세요.");
         }
@@ -22,7 +24,7 @@ const signup = async (req, res) => {
         const hashedPassword = await hashPassword(password);
 
         // 디비에 저장
-        await signupUser(userId, hashedPassword);
+        await userService.signupUser(user_id, hashedPassword, name, email);
 
         // 회원 가입 완료 메시지
         return res.status(200).send("회원가입 성공! 로그인을 해주세요.");
@@ -41,6 +43,8 @@ const login = async (req, res) => {
         if (!user) {
             return res.status(401).send("계정 정보가 일치하지 않습니다.");
         }
+
+        // TODO: 만약 사용자가 밴이나 삭제처리가 되어 있으면 리턴
 
         // 입력된 비밀번호를 해시된 비밀번호와 비교.
         const isPasswordValid = await bcrypt.compare(password, user.password);

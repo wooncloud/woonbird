@@ -9,43 +9,43 @@ const prisma = new PrismaClient({ log: ["query"] });
  * @returns {Promise<Object|null>} - 사용자가 존재하는 경우 해당 사용자 객체를 반환하고, 존재하지 않는 경우 null을 반환하는 프로미스 객체.
  */
 async function checkIfUserExists(id) {
-    let user = null;
-    try {
-        user = await prisma.users.findUnique({
-            where: { user_id: id },
-        });
-    } catch (e) {
-        console.error(e);
-    } finally {
-        await prisma.$disconnect();
-    }
+  let user = null;
+  try {
+    user = await prisma.users.findUnique({
+      where: { user_id: id },
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await prisma.$disconnect();
+  }
 
-    return user;
+  return user;
 }
 
-async function signupUser (id, pw) {
-    let user = null;
+async function signupUser(id, pw, name, email) {
+  let user = null;
 
-    // TODO 누락건 : 사용자 이름, 이메일
-    
-    try {
-      user = await prisma.users.create({
-        data: {
-          user_id: id,
-          pw: pw,
-        },
-      });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      await prisma.$disconnect();
-    }
-  
-    return user;
+  // TODO 누락건 : 사용자 이름, 이메일
+
+  try {
+    user = await prisma.users.create({
+      data: {
+        user_id: id, pw, name, email
+      },
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await prisma.$disconnect();
+  }
+
+  return user;
 }
 
 
 
 export default {
-    checkIfUserExists,
+  checkIfUserExists,
+  signupUser
 };
