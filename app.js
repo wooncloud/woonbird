@@ -31,12 +31,12 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use(session({
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     secret: process.env.COOKIE_SECRET,
-    cookie: {
-        httpOnly: true,
-        secure: false,
-    }
+    // cookie: {
+    //     httpOnly: true,
+    //     secure: false,
+    // }
 }));
 
 // 페이징 라우팅

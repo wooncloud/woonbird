@@ -1,7 +1,8 @@
 import express from 'express';
-import userService from '../services/user.js';
-import { hashPassword } from '../util/passwordUtils.js';
+import { user } from '../services/index.js';
+import { hashPassword, checkHash } from '../util/passwordUtils.js';
 import { isValidUserId, isValidPassword } from '../util/validationCheck.js';
+
 const app = express();
 
 const signup = async (req, res) => {
@@ -15,7 +16,7 @@ const signup = async (req, res) => {
         }
 
         // 이미 존재하는 아이디인지 확인
-        const userExists = await userService.checkIfUserExists(user_id);
+        const userExists = await user.findUserById(user_id);
         if (userExists) {
             return res.status(400).send("이미 존재하는 아이디 입니다. 다른 아이디를 입력해주세요.");
         }
@@ -24,7 +25,7 @@ const signup = async (req, res) => {
         const hashedPassword = await hashPassword(password);
 
         // 디비에 저장
-        await userService.signupUser(user_id, hashedPassword, name, email);
+        await user.signupUser(user_id, hashedPassword, name, email);
 
         // 회원 가입 완료 메시지
         return res.status(200).send("회원가입 성공! 로그인을 해주세요.");
@@ -36,24 +37,26 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { userId, password } = req.body;
+        const { user_id, password } = req.body;
 
         // 입력한 아이디로 사용자 정보를 가져옴.
-        const user = await findUserById(userId);
-        if (!user) {
+        const findUser = await user.findUserById(user_id);
+        if (!findUser) {
             return res.status(401).send("계정 정보가 일치하지 않습니다.");
         }
+
+        console.log(findUser);
 
         // TODO: 만약 사용자가 밴이나 삭제처리가 되어 있으면 리턴
 
         // 입력된 비밀번호를 해시된 비밀번호와 비교.
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await checkHash(password, findUser.pw);
         if (!isPasswordValid) {
             return res.status(401).send("비밀번호 틀림");
         }
 
         // 세션 생성 (세션 관리 미들웨어가 설정되어야 함)
-        req.session.user = user;
+        req.session.user = findUser;
 
         res.redirect('/main');
     } catch (error) {

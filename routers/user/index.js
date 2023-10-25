@@ -5,10 +5,7 @@ const router = express.Router();
 
 router.post('/signup', user.signup);
 
-router.post('/login', (req, res) => {
-	res.send('param is ' + req.params.id);
-	console.log(req.params, req.query);
-});
+router.post('/login', user.login);
 
 router.post('/logout', (req, res) => {
 	

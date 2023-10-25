@@ -9,7 +9,7 @@ const saltRounds = 10;
  * @returns {Promise<string>} - 패스워드를 해시화한 문자열을 반환하는 프로미스 객체.
  * @throws {Error} - 해시 생성 중 발생하는 오류를 던질 수 있음.
  */
-export async function hashPassword(password) {
+async function hashPassword(password) {
     try {
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
@@ -18,3 +18,9 @@ export async function hashPassword(password) {
         throw error;
     }
 }
+
+async function checkHash(receivedPw, hashedPassword) {
+    return await bcrypt.compare(receivedPw, hashedPassword);
+}
+
+export { hashPassword, checkHash }
