@@ -7,9 +7,7 @@ router.post('/signup', user.signup);
 
 router.post('/login', user.login);
 
-router.post('/logout', (req, res) => {
-	
-});
+router.post('/logout', user.logout);
 
 // 본인 정보 조회
 router.get("/me", (req, res) => {

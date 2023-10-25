@@ -41,13 +41,9 @@ const login = async (req, res) => {
 
         // 입력한 아이디로 사용자 정보를 가져옴.
         const findUser = await user.findUserById(user_id);
-        if (!findUser) {
-            return res.status(401).send("계정 정보가 일치하지 않습니다.");
-        }
-
-        console.log(findUser);
-
-        // TODO: 만약 사용자가 밴이나 삭제처리가 되어 있으면 리턴
+        if (!findUser) return res.status(401).send("계정 정보가 일치하지 않습니다.");
+        if (findUser.delete_date) return res.status(401).send("이 계정은 사용할 수 없습니다.");
+        if (findUser.ban_date) return res.status(401).send("이 계정은 이용중지 상태입니다.");
 
         // 입력된 비밀번호를 해시된 비밀번호와 비교.
         const isPasswordValid = await checkHash(password, findUser.pw);
@@ -55,10 +51,15 @@ const login = async (req, res) => {
             return res.status(401).send("비밀번호 틀림");
         }
 
-        // 세션 생성 (세션 관리 미들웨어가 설정되어야 함)
-        req.session.user = findUser;
+        // 세션
+        req.session.user = {
+            user_id : findUser.user_id, 
+            name : findUser.name,
+            profile_picture_url : findUser.profile_picture_url,
+            email : findUser.email,
+        };
 
-        res.redirect('/main');
+        res.send(req.session.user);
     } catch (error) {
         console.error(error);
         res.status(500).send("로그인 중 오류 발생");
@@ -72,7 +73,7 @@ const logout = (req, res) => {
                 console.error(err);
                 res.status(500).send("로그아웃 중 오류 발생");
             } else {
-                res.redirect('/login');
+                res.send('logout success');
             }
         });
     } catch (error) {
