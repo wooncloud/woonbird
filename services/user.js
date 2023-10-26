@@ -5,8 +5,6 @@ const prisma = new PrismaClient({ log: ["query"] });
 async function signupUser(id, pw, name, email) {
   let user = null;
 
-  // TODO 누락건 : 사용자 이름, 이메일
-
   try {
     user = await prisma.users.create({
       data: {
@@ -35,6 +33,18 @@ async function findUserById(id) {
   }
 
   return user;
+}
+
+async function updateUser(userInfo) {
+  try {
+    user = await prisma.users.update({
+      where: { user_id: id },
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
 export default {

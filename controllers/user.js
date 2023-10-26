@@ -12,13 +12,13 @@ const signup = async (req, res) => {
 
         // 유효성 검사를 수행
         if (!isValidUserId(user_id) || !isValidPassword(password)) {
-            return res.status(400).send("Invalid username or password format.");
+            return res.status(422).send("Invalid username or password format.");
         }
 
         // 이미 존재하는 아이디인지 확인
         const userExists = await user.findUserById(user_id);
         if (userExists) {
-            return res.status(400).send("이미 존재하는 아이디 입니다. 다른 아이디를 입력해주세요.");
+            return res.status(409).send("이미 존재하는 아이디 입니다. 다른 아이디를 입력해주세요.");
         }
 
         // 비밀번호 암호화
@@ -53,10 +53,10 @@ const login = async (req, res) => {
 
         // 세션
         req.session.user = {
-            user_id : findUser.user_id, 
-            name : findUser.name,
-            profile_picture_url : findUser.profile_picture_url,
-            email : findUser.email,
+            user_id: findUser.user_id,
+            name: findUser.name,
+            profile_picture_url: findUser.profile_picture_url,
+            email: findUser.email,
         };
 
         res.send(req.session.user);
@@ -82,8 +82,54 @@ const logout = (req, res) => {
     }
 };
 
+const getSessionUserInfo = async (req, res) => {
+    const sessionUser = req?.session?.user;
+    if (!sessionUser) {
+        return res.status(401).send("세션이 만료되었습니다.");
+    }
+
+    const findUser = await user.findUserById(sessionUser.user_id);
+    if (!findUser) {
+        return res.status(404).send("세션 사용자의 정보가 없습니다.");
+    }
+
+    const { user_id, name, profile_picture_url, created_date, email, } = findUser
+    res.send({ user_id, name, profile_picture_url, created_date, email });
+};
+
+const modifySessionUser = (req, res) => {
+    const sessionUser = req?.session?.user;
+    if (!sessionUser) {
+        return res.status(401).send("세션이 만료되었습니다.");
+    }
+
+    const userInfo = {
+        user_id: sessionUser.user_id,
+        
+    }
+
+    // 
+};
+
+const getUserInfo = async (req, res) => {
+    // 세션이 있어야 조회가 가능할지는, 생각중.
+
+    const { params: { id } } = req;
+    const findUser = await user.findUserById(id);
+    if (!findUser) {
+        return res.status(404).send("사용자의 정보가 없습니다.");
+    }
+
+    const { user_id, name, profile_picture_url, email, } = findUser
+    res.send({ user_id, name, profile_picture_url, email });
+};
+
+
 export default {
     signup,
     login,
-    logout
+    logout,
+    getSessionUserInfo,
+    modifySessionUser,
+    getUserInfo
 };
