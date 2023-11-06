@@ -50,4 +50,5 @@ async function updateUser(userInfo) {
 export default {
   signupUser,
   findUserById,
+  updateUser
 };

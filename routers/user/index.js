@@ -25,7 +25,7 @@ router.delete('/me', (req, res) => {
 	console.log(req.params, req.query);
 });
 
-// 유저 단일조회
+// 유저 단일조회 https://woonbird.com/user/@wooncloud
 router.get('/@:id', user.getUserInfo);
 
 // POST | /users/password | 비밀번호 찾기
