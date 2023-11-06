@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import session from "express-session";
@@ -12,6 +13,13 @@ import pageRouter from './routers/page.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const corsOrigin = process.env.NODE_ENV === 'production' ? process.env.PROD_ORIGIN : process.env.DEV_ORIGIN;
+const corsOptions = {
+    origin: corsOrigin,
+    optionsSuccessStatus: 200,
+    credentials: true
+};
+
 dotenv.config();
 
 const app = express();
@@ -19,6 +27,8 @@ const app = express();
 // ----- modules -----
 // morgan : 로그 남기는 라이브러리
 app.use(morgan('dev'));
+
+app.use(cors(corsOptions));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
