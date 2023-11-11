@@ -15,3 +15,15 @@ POST | /users/password | 비밀번호 찾기
 PATCH | /users/password | 비밀번호 변경
 GET | /users/:id | 해당 회원 정보 가져오기
 
+
+[GET] user/@userId/post/@postId/like
+-> 이 게시글을 좋아요 한 사람들
+
+[POST] user/@userId/post/@postId/like
+-> 사용자가 이 게시물을 좋아요 클릭함.
+
+[DELETE] user/@userId/post/@postId/like
+-> 사용자가 이 게시물을 좋아요 해제함.
+
+[GET] user/@userId/like
+-> 사용자가 좋아요한 게시글들을 모아봄
