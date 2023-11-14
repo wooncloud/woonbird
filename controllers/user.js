@@ -2,8 +2,18 @@ import express from "express";
 import { user } from "../services/index.js";
 import { hashPassword, checkHash } from "../util/passwordUtils.js";
 import { isValidUserId, isValidPassword } from "../util/validationCheck.js";
+import { generateIdenticonAvatar } from "../util/avatarGenerator.js";
 
 const app = express();
+
+/*
+  # 현재 사용자 컨트롤러가 긴 상황
+  > controller/user 디렉토리에 아래와 같은 컨트롤러를 두려고 함.
+  - 로그인, 로그아웃, 회원가입 (authController)
+  - 세션과 관련있는 컨트롤러 (sessionController)
+  - 마스터 관리자가 핸들링하는 컨트롤러 (accountController)
+  >> 하지만 이 프로젝트는 그렇게 공들이지 않겠다. 공부용이니까
+*/
 
 const signup = async (req, res) => {
   try {
@@ -11,26 +21,30 @@ const signup = async (req, res) => {
 
     // 유효성 검사를 수행
     if (!isValidUserId(user_id) || !isValidPassword(password)) {
-      return res
-        .status(422)
-        .send({ message: "Invalid username or password format." });
+      return res.status(422).send({ message: "Invalid username or password format." });
     }
 
     // 이미 존재하는 아이디인지 확인
     const userExists = await user.findUserById(user_id);
     if (userExists) {
-      return res
-        .status(409)
-        .send({
-          message: "이미 존재하는 아이디 입니다. 다른 아이디를 입력해주세요.",
-        });
+      return res.status(409).send({
+        message: "이미 존재하는 아이디 입니다. 다른 아이디를 입력해주세요.",
+      });
     }
 
     // 비밀번호 암호화
     const hashedPassword = await hashPassword(password);
+    // 프로필 사진
+    const profileImageUrl = generateIdenticonAvatar(user_id);
 
     // 디비에 저장
-    await user.signupUser(user_id, hashedPassword, name, email);
+    await user.signupUser({
+      id: user_id, 
+      pw: hashedPassword, 
+      name, 
+      email,
+      profile: profileImageUrl
+    });
 
     // 회원 가입 완료 메시지
     return res
@@ -98,6 +112,7 @@ const logout = (req, res) => {
   }
 };
 
+// 세션 사용자 정보 가져오기
 const getSessionUserInfo = async (req, res) => {
   const sessionUser = req?.session?.user;
   if (!sessionUser) {
@@ -113,25 +128,16 @@ const getSessionUserInfo = async (req, res) => {
   res.send({ user_id, name, profile_picture_url, created_date, email });
 };
 
-const modifySessionUser = (req, res) => {
+// 사용자 정보 가져오기
+const getUserInfo = async (req, res) => {
+  // TODO: 미들웨어 개발할 것
   const sessionUser = req?.session?.user;
   if (!sessionUser) {
     return res.status(401).send({ message: "세션이 만료되었습니다." });
   }
 
-  const userInfo = {
-    user_id: sessionUser.user_id,
-  };
+  const { params: { id }, } = req;
 
-  //
-};
-
-const getUserInfo = async (req, res) => {
-  // 세션이 있어야 조회가 가능할지는, 생각중.
-
-  const {
-    params: { id },
-  } = req;
   const findUser = await user.findUserById(id);
   if (!findUser) {
     return res.status(404).send({ message: "사용자의 정보가 없습니다." });
@@ -141,11 +147,79 @@ const getUserInfo = async (req, res) => {
   res.send({ user_id, name, profile_picture_url, email });
 };
 
+// 세션 유저 정보 변경
+const modifySessionUser = async (req, res) => {
+  const sessionUser = req?.session?.user;
+  if (!sessionUser) {
+    return res.status(401).send({ message: "세션이 만료되었습니다." });
+  }
+
+  if (req.params.id !== sessionUser.user_id) {
+    return res.status(403).send({ message: "본인의 정보만 수정할 수 있습니다." });
+  }
+
+  const findUser = await user.findUserById(sessionUser.user_id);
+  if (!findUser) {
+    return res.status(404).send({ message: "세션 사용자의 정보가 없습니다." });
+  }
+
+  // 사용자 정보를 빈값으로 채울 때, 문제가 생길 수 있음.
+  const userInfoForUpdate = { ...findUser, ...req.body };
+
+  const result = await user.updateUser(userInfoForUpdate);
+  if (result !== "") {
+    console.error(result);
+    res.status(500).send({ message: "서버에서 오류가 발생했습니다." });
+  }
+
+  res.send({ message: "정보가 수정 되었습니다." });
+};
+
+// 세션 정보 없이 데이터를 수정할 수 있다. 이는 마스터 관리자의 인증이 필요하다.
+const modifyUser = async (req, res) => {
+  // 관리자의 key 또는 관리자 세션이 필요
+
+  const findUser = await user.findUserById(req.params.id);
+  if (!findUser) {
+    return res.status(404).send({ message: "사용자의 정보가 없습니다." });
+  }
+
+  const userInfoForUpdate = { ...findUser, ...req.body };
+
+  const result = await user.updateUser(userInfoForUpdate);
+  if (result !== "") {
+    console.error(result);
+    res.status(500).send({ message: "서버에서 오류가 발생했습니다." });
+  }
+
+  res.send({ message: "정보가 수정 되었습니다." });
+};
+
+// 유저 삭제 처리
+const deleteUser = async (req, res) => {
+  req.body = { 
+    ...req.body,
+    delete_date: new Date().toISOString()
+  }
+  modifyUser(req, res);
+}
+
+// 유저 밴 처리
+const banUser = async (req, res) => {
+  req.body = { 
+    ...req.body,
+    ban_date: new Date().toISOString()
+  }
+  modifyUser(req, res);
+}
+
 export default {
   signup,
   login,
   logout,
   getSessionUserInfo,
-  modifySessionUser,
   getUserInfo,
+  modifySessionUser,
+  deleteUser,
+  banUser
 };

@@ -13,17 +13,13 @@ router.post('/logout', user.logout);
 router.get("/me", user.getSessionUserInfo);
 
 // 본인 정보 수정
-router.patch('/me', (req, res) => {
-	res.send('param is ' + req.params.id);
-	console.log(req.params, req.query);
-});
+router.patch('/:id', user.modifySessionUser);
 
-// 본인 정보 삭제
-router.delete('/me', (req, res) => {
-	// 실제 삭제가 아니고 delete_date modify
-	res.send('param is ' + req.params.id);
-	console.log(req.params, req.query);
-});
+// 사용자 삭제 처리
+router.delete('/:id', user.deleteUser);
+
+// 사용자 밴 처리
+router.patch('/ban/:id', user.banUser);
 
 // 유저 단일조회 https://woonbird.com/user/@wooncloud
 router.get('/@:id', user.getUserInfo);
